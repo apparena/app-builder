@@ -16,9 +16,9 @@ var ReactComponentGenerator = yeoman.generators.Base.extend({
 		var done = this.async();
 
 		this.log(
-			"\n" + chalk.bold.underline("Welcome to the Electrode Component Generator") +
+			"\n" + chalk.bold.underline("Welcome to the AppArena Electrode Component Generator") +
 			"\n" +
-			"\nWe're going to set up a new " + chalk.bold("Electrode") + " component, ready for development with" +
+			"\nWe're going to set up a new " + chalk.bold("AppArena Electrode") + " component, ready for development with" +
 			"\n" + chalk.bold("gulp, webpack, demo, electrode component archetype, and live-reload") +
 			"\n"
 		);
