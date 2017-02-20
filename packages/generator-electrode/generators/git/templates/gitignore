@@ -148,6 +148,9 @@ Temporary Items
 .project
 .tmp
 
+# App-Arena Env Files
+config/apparena.json
+
 # Build
 dist
 Procfile

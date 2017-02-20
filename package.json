@@ -1,16 +1,16 @@
 {
-  "name": "electrode",
+  "name": "app-builder",
   "version": "1.0.0",
   "private": true,
-  "description": "Electrode Platform for NodeJS/React Universal Application",
+  "description": "App-Arena App-Platform for NodeJS/React Universal Application",
   "repository": {
     "type": "git",
-    "url": "https://github.com/electrode-io/electrode.git"
+    "url": "https://github.com/apparena/app-builder"
   },
   "bugs": {
-    "url": "https://github.com/electrode-io/electrode/issues"
+    "url": "https://github.com/apparena/app-builder/issues"
   },
-  "homepage": "http://www.electrode.io",
+  "homepage": "http://www.app-arena.com",
   "license": "Apache-2.0",
   "scripts": {
     "test": "lerna bootstrap && lerna run test && gulp build-test",

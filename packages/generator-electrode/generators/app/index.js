@@ -10,6 +10,7 @@ var _ = require('lodash');
 var extend = _.merge;
 var parseAuthor = require('parse-author');
 var githubUsername = require('github-username');
+var getAppArenaComponent = require('./helpers/apparena');
 
 const ExpressJS = 'ExpressJS';
 const HapiJS = 'HapiJS';
@@ -197,6 +198,43 @@ module.exports = generators.Base.extend({
       });
     },
 
+    askForAppArenaAccount: function () {
+      var prompts = [
+        {
+          type: "input",
+          name: 'projectId',
+          message: 'App-Arena Project Id',
+          when: !this.props.projectId
+        },
+        {
+          type: "input",
+          name: 'aaApiKey',
+          message: 'App-Arena Api-Key',
+          when: !this.props.aaApiKey
+        }
+      ];
+      return this.prompt(prompts).then((props) => {
+        this.props = extend(this.props, props);
+        // saving to storage after the correct destination root is set
+        this.config.set('projectId', this.props.projectId);
+      });
+    },
+
+    askForAppArenaComponents: function () {
+      var done = this.async();
+      getAppArenaComponent("", (err, choices) => {
+        this.prompt({
+          name: 'apparenaComponents',
+          type: 'checkbox',
+          message: 'Select the Components you want to install',
+          choices: choices
+        }).then((prompt) => {
+          this.props.apparenaComponents = prompt;
+          done();
+        });
+      });
+    },
+
     askForGithubAccount: function () {
       if (this.options.githubAccount) {
         this.props.githubAccount = this.options.githubAccount;
@@ -230,7 +268,7 @@ module.exports = generators.Base.extend({
     if (isHapi) {
       ignoreArray.push('**/src/server/express-server.js');
       ignoreArray.push('**/src/server/koa-server.js');
-    } else if (isExpress)  {
+    } else if (isExpress) {
       ignoreArray.push('**/src/server/koa-server.js');
     } else {
       ignoreArray.push('**/src/server/express-server.js');
@@ -267,11 +305,17 @@ module.exports = generators.Base.extend({
       files: [
         this.options.projectRoot
       ],
+      dependencies: {},
       main: path.join(
         this.options.projectRoot,
         'index.js'
       ).replace(/\\/g, '/'),
       keywords: []
+    });
+
+    console.log(this.props.apparenaComponents);
+    this.props.apparenaComponents.forEach((components) => {
+      updatePkg.dependencies[components.name] = components.version;
     });
 
     var pkg = extend({}, defaultPkg, updatePkg);
@@ -342,11 +386,11 @@ module.exports = generators.Base.extend({
       });
     }
 
-    this.composeWith('electrode:editorconfig', {}, {
+    this.composeWith('apparena-app-builder:editorconfig', {}, {
       local: require.resolve('../editorconfig')
     });
 
-    this.composeWith('electrode:git', {
+    this.composeWith('apparena-app-builder:git', {
       options: {
         name: this.props.name,
         githubAccount: this.props.githubAccount
@@ -367,8 +411,19 @@ module.exports = generators.Base.extend({
       });
     }
 
+    if (this.props.projectId && this.props.aaApiKey) {
+      this.composeWith('apparena-app-builder:env', {
+        options: {
+          aaApiKey: this.props.aaApiKey,
+          projectId: this.props.projectId
+        }
+      }, {
+        local: require.resolve('../env')
+      });
+    }
+
     if (!this.fs.exists(this.destinationPath('README.md'))) {
-      this.composeWith('electrode:readme', {
+      this.composeWith('apparena-app-builder:readme', {
         options: {
           name: this.props.name,
           description: this.props.description,
@@ -383,7 +438,7 @@ module.exports = generators.Base.extend({
     }
 
     if (!this.fs.exists(this.destinationPath('config/default.js'))) {
-      this.composeWith('electrode:config', {
+      this.composeWith('apparena-app-builder:config', {
         options: {
           name: this.props.name,
           pwa: this.props.pwa,
@@ -396,7 +451,7 @@ module.exports = generators.Base.extend({
     }
 
     if (!this.fs.exists(this.destinationPath('server/plugins/webapp'))) {
-      this.composeWith('electrode:webapp', {
+      this.composeWith('apparena-app-builder:webapp', {
         options: {
           pwa: this.props.pwa,
           isAutoSsr: this.props.autoSsr
@@ -409,7 +464,9 @@ module.exports = generators.Base.extend({
 
   install: function () {
     this.installDependencies({
-      bower: false
+      bower: false,
+      npm: true,
+      yarn: true
     });
   },
 
